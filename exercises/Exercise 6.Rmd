@@ -26,6 +26,8 @@ library(dplyr)
 #a. Bar chart for a nominal variable showing raw counts: Create the bar chart for BMI categories (BMIcat)
 #ggplot (data, aes(x=Catvar)) + geom_bar() + labs(title="", x="", y="")
 
+ggplot(NHANESdata, aes(x=BMIcat)) + geom_bar() + labs(title = "BMI categories histogram", x="BMI category", y="Number of Individuals")
+
 ```
 
 ```{r}
@@ -36,23 +38,32 @@ library(dplyr)
 #new_data_frame <- as.data.frame(prop.table(new_table_name)*100
 #ggplot(new_data_frame, aes(BMIcat, Freq)) + geom_col()
 
+BMIcatBar <- with(NHANESdata, table(BMIcat))
+prop.table(BMIcatBar)
+prop.table(BMIcatBar)*100
+BMIcatBarframe <- as.data.frame(prop.table(BMIcatBar)*100)
+ggplot(BMIcatBarframe, aes(BMIcat, Freq)) + geom_col()
+
 ```
 
 c. Construct bar charts for one ordinal variable in the code chunk below:
 ```{r}
-
+ggplot(NHANESdata, aes(x=Education)) + geom_bar() + labs(title = "Education bar chart", x="Education level", y="number of individual")
 ```
 
 d. Constructing bar charts for a nominal/ordinal variable grouped by another nominal/ordinal variable:
 ```{r}
 #BMI_cats by gender: stacked, grouped and filled bar charts:
 #table(data$Independent variable, data$Dependent variable)
+table(NHANESdata$BMIcat, NHANESdata$Gender)
 #Stacked bar chart:
 #ggplot(data, aes(x=Independent variable, fill=Dependent variable)) + geom_bar(position = "stack") + labs(title="", x="", y="")
-
+ggplot(NHANESdata, aes(x=BMIcat, fill=Gender)) + geom_bar(position = "stack") + labs(title="BMIcat & Gender bar chart (stacked)", x="BMI category", y="number of indivuals")
+ggplot(NHANESdata, aes(x=BMIcat, fill=Gender)) + geom_bar(position = "stack") + facet_wrap(~Race) + labs(title="BMIcat & Gender bar chart (stacked)", x="BMI category", y="number of indivuals")
+ggplot(NHANESdata, aes(x=BMIcat, fill=Gender)) + geom_bar(position = "stack") + facet_grid(~Race) + labs(title="BMIcat & Gender bar chart (stacked)", x="BMI category", y="number of indivuals")
 #grouped bar chart:
 #ggplot(data, aes(x=Independent variable, fill=dependent variable)) + geom_bar(position = "dodge") + labs(title="", x="Gender", y="Frequency")
-
+ggplot(NHANESdata, aes(x=BMIcat, fill=Gender)) + geom_bar(position = "dodge") + labs(title = "BMIcat & Gender bar chart (grouped)", x="BMI category", y="number of indivuals")
 ```
 
 e. Constructing bar charts for mean +/- standard error of continuous variables
@@ -64,9 +75,22 @@ e. Constructing bar charts for mean +/- standard error of continuous variables
 #summarize(n=n(), mean=mean(dependent variable), sd=sd(dependent variable))
 #to print new data frame: new_data_frame
 
+BMIgenderFrame <- NHANESdata%>%
+  drop_na(BMI)%>%
+  group_by(Gender)%>%
+  summarise(n=n(), mean=mean(BMI), sd=sd(BMI))
+BMIgenderFrame
+
 #2 Plot means in a sorted bar chart and adds error bars that represent the standard deviation
 #ggplot(new_data_frame, aes(x=reorder(Independent variable, mean), y=mean)) + geom_bar(stat="identity", fill="color") + geom_errorbar(aes(ymin=mean-sd, ymax=mean+sd), width=0.2)
 #labs(x="", y="", title="", subtitle="")
+
+#BMIgenderFrame <- BMIgenderFrame %>%
+  #group_by(Gender) %>%
+  #summarize(mean = mean(BMI, na.rm = TRUE), sd = sd(BMI, na.rm = TRUE))
+
+ggplot(BMIgenderFrame, aes(x=reorder(Gender, mean), y=mean)) + geom_bar(stat = "identity", fill="blue") + geom_errorbar(aes(ymin=mean-sd, ymax=mean+sd), width=0.2)
+labs(x="", y="", title="", subtitle = "")
 
 ```
 
@@ -75,11 +99,15 @@ e. Constructing bar charts for mean +/- standard error of continuous variables
 #a. simple histogram: ggplot(data, aes(x=contvar)) + geom_histogram() + labs(title="", x="", y="")
 #construct a histogram for BMI:
 
+ggplot(NHANESdata, aes(x=BMI)) + geom_histogram() + labs(title = "BMI histogram", x="BMI", y="number of individuals")
+
 ```
 
 ```{r}
 #b. colored histogram with 20 bins: ggplot(data, aes(x=contvar)) + geom_histogram(bins=20, color="white", fill="steelblue") + labs(title="Colored histogram with 20 bins", x="", y="")
 #do the above code for BMI:
+
+ggplot(NHANESdata, aes(x=BMI)) + geom_histogram(bins=20, color="white", fill="steelblue") + labs(title = "colored BMI histogram w 20 bins", x="BMI", y="number of indivuals") 
 
 ```
 
@@ -87,14 +115,29 @@ e. Constructing bar charts for mean +/- standard error of continuous variables
 #c. Histogram with percentages:
 #ggplot(data, aes(x=contvar, y=..density..)) + geom_histogram(bins=20, color="white", fill="steelblue") + scale_y_continuous(labels=scales::percent) + labs(title="", y="percent", x="")
 
+
+ggplot(NHANESdata, aes(x=BMI, y=..density..)) + geom_histogram(bins=20, color="white", fill="steelblue") + scale_y_continuous(labels=scales::percent) + labs(title="% BMI histogram", y="percent of individuals", x="BMI")
+
 ```
 
 d: Create a histogram of a different continuous variable:
+```{r}
+#ggplot(NHANESdata, aes(x=BMI)) + geom_histogram() + labs(title = "", x="", y="")
+ggplot(NHANESdata, aes(x=Age)) + geom_histogram() + labs(title = "Age histogram", x="Age", y="Number of Individuals")
+#ggplot(NHANESdata, aes(x=BMI)) + geom_histogram(bins=20, color="white", fill="steelblue") + labs(title = "Colored histogram w 20 bins", x="", y="") 
+ggplot(NHANESdata, aes(x=Age)) + geom_histogram(bins=20, color="black", fill="green") + labs(title = "colored Age histogram w 20 bins", x="Age", y="Number of Individuals") 
+#ggplot(NHANESdata, aes(x=BMI, y=..density..)) + geom_histogram(bins=20, color="white", fill="steelblue") + scale_y_continuous(labels=scales::percent) + labs(title="", y="percent", x="")
+ggplot(NHANESdata, aes(x=Age, y=..density..)) + geom_histogram(bins=20, color="black", fill="green") + scale_y_continuous(labels=scales::percent) + labs(title="% Age histogram", y="Percent of Individuals", x="Age")
+```
+
 
 3. Box plots: a box and whisker plot describes the distribution of a continuous variable by plotting its five-number summary: minimum, lower quartile (25th percentile), median (50th percentile), upper quartile (75th percentile), and maximum, and the outliers (values outside of the +/- 1.5xQR)
 ```{r}
 #a.ggplot(data, aes(x="", y=Contvar)) + geom_boxplot() + labs(y="", x="", title="")
 #Create a box plot of the amount of protein consumed in a day (DR1TPROT)
+
+
+ggplot(NHANESdata, aes(x=, y=DR1TPROT)) + geom_boxplot() + labs(y="protien consumed in a day", x="individuals", title = "DR1TPROT box plot")
 
 ```
 
@@ -102,6 +145,10 @@ d: Create a histogram of a different continuous variable:
 ```{r}
 #b. Create a box plot that comnpares a continuous variable across different levels of a nominal or ordinal variable: DR1TPROT by race:
 #ggplot(data, aes(x=Independent variable, y=Contvar)) + geom_boxplot(fill="color") + labs(x="Independent variable", y="Contvar", title="")
+
+
+ggplot(NHANESdata, aes(x=Race, y=DR1TPROT)) + geom_boxplot(fill="green") + labs(x="Race", y="DR1TPROT", title = "DR1TPROT & Race box plot")
+
 
 ```
 
